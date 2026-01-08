@@ -5,79 +5,6 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DocuFlow - Markdown to Word</title>
-    <!-- Tailwind CSS with Typography Plugin (CDN Mode for simplicity with existing config) -->
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                50: '#f0f9ff',
-                100: '#e0f2fe',
-                500: '#0ea5e9',
-                600: '#0284c7',
-                900: '#0c4a6e',
-              }
-            },
-            typography: (theme) => ({
-              DEFAULT: {
-                css: {
-                  maxWidth: 'none',
-                  code: {
-                    backgroundColor: theme('colors.gray.100'),
-                    padding: '2px 4px',
-                    borderRadius: '0.25rem',
-                    fontWeight: '400',
-                  },
-                  'code::before': {
-                    content: '""',
-                  },
-                  'code::after': {
-                    content: '""',
-                  },
-                  // Explicitly set base list styles to ensure visibility
-                  'ul': {
-                    listStyleType: 'disc',
-                    paddingLeft: '1.625em',
-                  },
-                  'ol': {
-                    listStyleType: 'decimal',
-                    paddingLeft: '1.625em',
-                  },
-                  'li': {
-                    marginTop: '0.25em',
-                    marginBottom: '0.25em',
-                  },
-                  // Enhanced Nested List Styling
-                  'ul ul': {
-                    listStyleType: 'circle',
-                    marginTop: '0.125em',
-                    marginBottom: '0.125em',
-                  },
-                  'ul ul ul': {
-                    listStyleType: 'square',
-                  },
-                  'ol ol': {
-                    listStyleType: 'lower-alpha',
-                    marginTop: '0.125em',
-                    marginBottom: '0.125em',
-                  },
-                  'ol ol ol': {
-                    listStyleType: 'lower-roman',
-                  },
-                },
-              },
-            }),
-          }
-        }
-      }
-    </script>
-    <!-- KaTeX CSS for math rendering -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <!-- Highlight.js styles for code blocks -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
     <!-- Word-specific meta tags to help with pasting -->
     <meta name="title" content="DocuFlow Export">
   <script type="importmap">
@@ -92,7 +19,10 @@
     "remark-math": "https://esm.sh/remark-math@^6.0.0",
     "rehype-katex": "https://esm.sh/rehype-katex@^7.0.1",
     "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "highlight.js/": "https://esm.sh/highlight.js@^11.11.1/",
+    "katex/": "https://esm.sh/katex@^0.16.27/",
+    "rehype-highlight": "https://esm.sh/rehype-highlight@^7.0.2"
   }
 }
 </script>

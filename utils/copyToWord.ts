@@ -88,7 +88,7 @@ export const copyContentToWord = async (elementId: string): Promise<boolean> => 
           margin-bottom: 3pt;
         }
 
-        /* Nested List Markers for Word Compatibility */
+        /* Nested List Markers for Word Compatibility - Matches Tailwind Config */
         ul { list-style-type: disc; }
         ul ul { list-style-type: circle; margin-top: 3pt; margin-bottom: 3pt; }
         ul ul ul { list-style-type: square; }
