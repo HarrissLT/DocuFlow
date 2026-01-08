@@ -1,0 +1,5 @@
+{
+  "name": "DocuFlow AI Converter",
+  "description": "Professional Markdown and LaTeX converter optimized for copying AI chatbot outputs (ChatGPT, Claude, Gemini) directly to Microsoft Word with perfect formatting.",
+  "requestFramePermissions": []
+}
