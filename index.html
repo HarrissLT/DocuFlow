@@ -37,15 +37,32 @@
                   'code::after': {
                     content: '""',
                   },
-                  // Enhanced List Styling for Preview
+                  // Explicitly set base list styles to ensure visibility
+                  'ul': {
+                    listStyleType: 'disc',
+                    paddingLeft: '1.625em',
+                  },
+                  'ol': {
+                    listStyleType: 'decimal',
+                    paddingLeft: '1.625em',
+                  },
+                  'li': {
+                    marginTop: '0.25em',
+                    marginBottom: '0.25em',
+                  },
+                  // Enhanced Nested List Styling
                   'ul ul': {
                     listStyleType: 'circle',
+                    marginTop: '0.125em',
+                    marginBottom: '0.125em',
                   },
                   'ul ul ul': {
                     listStyleType: 'square',
                   },
                   'ol ol': {
                     listStyleType: 'lower-alpha',
+                    marginTop: '0.125em',
+                    marginBottom: '0.125em',
                   },
                   'ol ol ol': {
                     listStyleType: 'lower-roman',
@@ -58,7 +75,7 @@
       }
     </script>
     <!-- KaTeX CSS for math rendering -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4sm51nBdGOwMJ025xr96x85xrhBf6Lcs26ry55p06be4u8k" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <!-- Highlight.js styles for code blocks -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
     <!-- Word-specific meta tags to help with pasting -->
