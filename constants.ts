@@ -78,6 +78,93 @@ Demonstrating sub-items and ordinal markers:
 2.  **Phase Two**: Deployment
 `;
 
+export const SAMPLE_LATEX = `\\documentclass[12pt,a4paper]{article}
+
+\\usepackage[utf8]{inputenc}
+\\usepackage[T5]{fontenc}
+\\usepackage[vietnamese]{babel}
+\\usepackage{amsmath,amssymb,amsfonts}
+\\usepackage{geometry}
+\\usepackage{enumitem}
+\\usepackage{multicol}
+\\usepackage{fancyhdr}
+
+\\geometry{
+    top=2cm,
+    bottom=2cm,
+    left=2cm,
+    right=2cm
+}
+
+\\setlength{\\parindent}{0pt}
+\\setlength{\\parskip}{0.3em}
+
+\\pagestyle{fancy}
+\\fancyhf{}
+\\rhead{Mã đề: LP105}
+\\lhead{Toán 10 - Học kì 2}
+\\cfoot{\\thepage}
+
+\\begin{document}
+
+\\begin{center}
+    {\\Large\\textbf{ĐỀ THI THẬT MÃ LP105}}\\\\[0.3em]
+    {\\large\\textbf{Môn: Toán 10 (Học kì 2)}}\\\\[0.3em]
+    \\textbf{Thời gian làm bài: 90 phút}
+\\end{center}
+
+\\vspace{0.5em}
+
+\\section*{PHẦN I: TRẮC NGHIỆM KHÁCH QUAN (20 CÂU)}
+\\textit{(Chọn 01 phương án đúng nhất trong các phương án A, B, C, D)}
+
+\\textbf{Câu 1.} Tìm tập xác định của hàm số 
+\\[
+y = \\frac{3x - 2}{2x - 5}.
+\\]
+
+\\begin{enumerate}[label=\\Alph*.]
+    \\item $D = \\mathbb{R} \\setminus \\left\\{\\dfrac{2}{3}\\right\\}$
+    \\item $D = \\mathbb{R} \\setminus \\left\\{\\dfrac{5}{2}\\right\\}$
+    \\item $D = \\left(\\dfrac{5}{2}; +\\infty\\right)$
+    \\item $D = \\mathbb{R}$
+\\end{enumerate}
+
+\\textbf{Câu 2.} Tọa độ đỉnh của Parabol
+\\[
+(P): y = -x^2 + 6x - 2
+\\]
+là:
+
+\\begin{enumerate}[label=\\Alph*.]
+    \\item $(3; 7)$
+    \\item $(-3; -29)$
+    \\item $(3; -11)$
+    \\item $(-3; 7)$
+\\end{enumerate}
+
+\\textbf{Câu 3.} Tập nghiệm của bất phương trình
+\\[
+x^2 - 7x + 10 \\le 0
+\\]
+là:
+
+\\begin{enumerate}[label=\\Alph*.]
+    \\item $(-\\infty; 2] \\cup [5; +\\infty)$
+    \\item $(2; 5)$
+    \\item $[2; 5]$
+    \\item $(-\\infty; 2) \\cup (5; +\\infty)$
+\\end{enumerate}
+
+\\vspace{1em}
+
+\\begin{center}
+    \\textbf{--- HẾT ---}
+\\end{center}
+
+\\end{document}
+`;
+
 export const EMPTY_PLACEHOLDER = `Paste your AI content here...
 
 Supported features:
