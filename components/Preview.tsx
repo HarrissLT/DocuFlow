@@ -5,6 +5,7 @@ import remarkMath from 'remark-math';
 import remarkBreaks from 'remark-breaks';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeRaw from 'rehype-raw';
 
 interface PreviewProps {
   content: string;
@@ -29,7 +30,7 @@ export const Preview: React.FC<PreviewProps> = ({ content, previewId }) => {
         <article className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-brand-600 hover:prose-a:text-brand-500 prose-img:rounded-lg">
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-            rehypePlugins={[rehypeKatex, rehypeHighlight]}
+            rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight]}
             components={{
               // Explicit list handling to ensure structure matches expectation
               ul: ({ node, ...props }) => <ul className="list-disc pl-6 my-4" {...props} />,
