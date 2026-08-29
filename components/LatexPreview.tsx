@@ -1,14 +1,18 @@
 import React, { useRef, useState } from 'react';
-import { Play, FileText } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Play, FileText, Settings, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface LatexPreviewProps {
   content: string;
 }
 
+type CompilerChoice = 'pdflatex' | 'xelatex' | 'lualatex';
+
 export const LatexPreview: React.FC<LatexPreviewProps> = ({ content }) => {
   const formRef = useRef<HTMLFormElement>(null);
   const [isCompiling, setIsCompiling] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [compiler, setCompiler] = useState<CompilerChoice>('pdflatex');
 
   const handleCompile = () => {
     setIsCompiling(true);
@@ -31,28 +35,81 @@ export const LatexPreview: React.FC<LatexPreviewProps> = ({ content }) => {
           <FileText className="w-4 h-4 text-brand-500" />
           <h2 className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">LaTeX PDF Preview</h2>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleCompile}
-          disabled={isCompiling}
-          className="flex items-center space-x-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg shadow-sm shadow-brand-500/20 text-sm font-medium transition-colors"
-        >
-          {isCompiling ? (
-            <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-            >
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-            </motion.div>
-          ) : (
-            <Play className="w-4 h-4 fill-current" />
-          )}
-          <span>{isCompiling ? 'Compiling...' : 'Compile PDF'}</span>
-        </motion.button>
+        <div className="flex items-center space-x-3">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowSettings(!showSettings)}
+            className={`p-2 rounded-lg transition-colors ${showSettings ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}`}
+          >
+            <Settings className="w-4 h-4" />
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleCompile}
+            disabled={isCompiling}
+            className="flex items-center space-x-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg shadow-sm shadow-brand-500/20 text-sm font-medium transition-colors"
+          >
+            {isCompiling ? (
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              >
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+              </motion.div>
+            ) : (
+              <Play className="w-4 h-4 fill-current" />
+            )}
+            <span>{isCompiling ? 'Compiling...' : 'Compile PDF'}</span>
+          </motion.button>
+        </div>
       </div>
 
-      <div className="flex-1 w-full bg-gray-100 dark:bg-gray-900 relative">
+      <div className="flex-1 w-full bg-gray-100 dark:bg-gray-900 relative overflow-hidden">
+        <AnimatePresence>
+          {showSettings && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="absolute top-0 inset-x-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10 shadow-lg"
+            >
+              <div className="p-4 flex flex-col space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Advanced Compilation Settings</h3>
+                  <button onClick={() => setShowSettings(false)} className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Compiler Engine</label>
+                  <div className="flex p-1 bg-gray-100 dark:bg-gray-900 rounded-lg w-fit">
+                    {(['pdflatex', 'xelatex', 'lualatex'] as CompilerChoice[]).map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setCompiler(c)}
+                        className={`px-3 py-1.5 text-xs font-medium border border-transparent rounded-md transition-all ${
+                          compiler === c 
+                            ? 'bg-white dark:bg-gray-800 text-brand-600 dark:text-brand-400 shadow-sm border-gray-200 dark:border-gray-700' 
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                        }`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                    Select xelatex or lualatex if you are using specific fonts or modern packages.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <iframe
           name="latex-preview-frame"
           className="w-full h-full border-none bg-white rounded-bl-xl md:rounded-bl-none"
@@ -62,7 +119,7 @@ export const LatexPreview: React.FC<LatexPreviewProps> = ({ content }) => {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center"
+            className="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm flex items-center justify-center z-20"
           >
             <div className="flex flex-col items-center space-y-4">
                <motion.div 
@@ -84,6 +141,7 @@ export const LatexPreview: React.FC<LatexPreviewProps> = ({ content }) => {
           className="hidden"
         >
           <input type="hidden" name="text" value={content} />
+          <input type="hidden" name="command" value={compiler} />
         </form>
       </div>
     </motion.div>

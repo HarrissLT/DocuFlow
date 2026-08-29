@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { FileText, Copy, Trash2, Moon, Sun, Check, FileDown, Code, ArrowRight } from 'lucide-react';
+import { FileText, Copy, Trash2, Moon, Sun, Check, FileDown, Code, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export type EditorMode = 'markdown' | 'latex';
+export type EditorMode = 'markdown' | 'latex' | 'custom';
 
 interface ToolbarProps {
   mode: EditorMode;
   onModeChange: (mode: EditorMode) => void;
   onLoadSample: () => void;
+  onAutoFixLatex?: () => void;
   onClear: () => void;
   onCopy: () => void;
   isCopied: boolean;
@@ -19,6 +20,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   mode,
   onModeChange,
   onLoadSample,
+  onAutoFixLatex,
   onClear,
   onCopy,
   isCopied,
@@ -45,7 +47,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         </motion.div>
         
         <div className="flex bg-gray-100/80 dark:bg-gray-800/80 p-1.5 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
-          {(['markdown', 'latex'] as EditorMode[]).map((m) => (
+          {(['markdown', 'custom', 'latex'] as EditorMode[]).map((m) => (
             <button
               key={m}
               onClick={() => onModeChange(m)}
@@ -63,8 +65,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 />
               )}
               <span className="relative z-10 flex items-center gap-2">
-                {m === 'markdown' ? <Code className="w-4 h-4" /> : <FileDown className="w-4 h-4" />}
-                <span className="capitalize">{m === 'latex' ? 'LaTeX PDF' : m}</span>
+                {m === 'markdown' && <Code className="w-4 h-4" />}
+                {m === 'custom' && <FileText className="w-4 h-4" />}
+                {m === 'latex' && <FileDown className="w-4 h-4" />}
+                <span className="capitalize">
+                  {m === 'latex' ? 'LaTeX PDF' : m === 'custom' ? 'Custom List' : m}
+                </span>
               </span>
             </button>
           ))}
@@ -78,6 +84,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         >
           Load Sample
         </motion.button>
+        {onAutoFixLatex && (
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onAutoFixLatex}
+            className="px-3.5 py-2 text-sm font-medium text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-900/40 rounded-xl hover:bg-brand-100 dark:hover:bg-brand-900/60 border border-brand-200/50 dark:border-brand-700/50 transition-colors shadow-sm flex items-center space-x-1.5"
+            title="Tự động nhận diện & chuyển đổi công thức LaTeX (\\[...\\] -> $...$)"
+          >
+            <Sparkles className="w-4 h-4 text-brand-500" />
+            <span className="hidden md:inline">Sửa LaTeX</span>
+          </motion.button>
+        )}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -100,7 +118,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </motion.button>
 
-        {mode === 'markdown' && (
+        {(mode === 'markdown' || mode === 'custom') && (
           <motion.button
             whileHover={!isCopied ? { scale: 1.02, y: -1 } : {}}
             whileTap={!isCopied ? { scale: 0.98 } : {}}

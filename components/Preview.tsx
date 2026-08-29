@@ -9,12 +9,19 @@ import rehypeRaw from 'rehype-raw';
 import { motion, AnimatePresence } from 'motion/react';
 import { Eye } from 'lucide-react';
 
+import { EditorMode } from './Toolbar';
+
+const ListDepthContext = React.createContext(0);
+
 interface PreviewProps {
   content: string;
   previewId: string;
+  mode?: EditorMode;
 }
 
-export const Preview: React.FC<PreviewProps> = ({ content, previewId }) => {
+export const Preview: React.FC<PreviewProps> = ({ content, previewId, mode }) => {
+  const isCustom = mode === 'custom';
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: 20 }}
@@ -26,17 +33,13 @@ export const Preview: React.FC<PreviewProps> = ({ content, previewId }) => {
       <div className="px-5 py-3 bg-gray-50/80 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800 flex items-center space-x-2">
         <Eye className="w-4 h-4 text-brand-500" />
         <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-          Word Preview
+          {isCustom ? 'Custom List Preview' : 'Word Preview'}
         </span>
       </div>
       
-      {/* 
-        We use an ID here to target this container for the Clipboard API.
-        The classes "prose" come from @tailwindcss/typography.
-      */}
       <div 
         id={previewId}
-        className="flex-1 w-full p-8 overflow-y-auto custom-scrollbar bg-white dark:bg-gray-900 selection:bg-brand-200 dark:selection:bg-brand-900/60 transition-colors"
+        className={`flex-1 w-full p-8 overflow-y-auto custom-scrollbar bg-white dark:bg-gray-900 selection:bg-brand-200 dark:selection:bg-brand-900/60 transition-colors ${isCustom ? 'custom-list-type' : ''}`}
       >
         <AnimatePresence mode="wait">
           <motion.article 
@@ -51,9 +54,42 @@ export const Preview: React.FC<PreviewProps> = ({ content, previewId }) => {
               rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight]}
               components={{
                 // Explicit list handling to ensure structure matches expectation
-                ul: ({ node, ...props }) => <ul className="list-disc pl-6 my-4" {...props} />,
+                ul: ({ node, children, ...props }) => {
+                  const depth = React.useContext(ListDepthContext);
+                  return (
+                    <ListDepthContext.Provider value={depth + 1}>
+                      <ul 
+                        className={`${isCustom ? 'list-none pl-0' : 'list-disc pl-6'} my-4`} 
+                        {...props}
+                      >
+                        {children}
+                      </ul>
+                    </ListDepthContext.Provider>
+                  );
+                },
                 ol: ({ node, ...props }) => <ol className="list-decimal pl-6 my-4" {...props} />,
-                li: ({ node, ...props }) => <li className="my-1" {...props} />,
+                li: ({ node, children, ...props }) => {
+                  const depth = React.useContext(ListDepthContext);
+                  if (isCustom) {
+                    const marker = depth === 1 ? '- ' : '+ ';
+                    return (
+                      <li 
+                        className="custom-li my-1" 
+                        style={{ 
+                          paddingLeft: '20pt', 
+                          textIndent: '-15pt',
+                          listStyleType: 'none',
+                          display: 'block'
+                        }} 
+                        {...props}
+                      >
+                        <span className="text-brand-500 font-bold" style={{ textIndent: '0', display: 'inline-block', width: '15pt' }}>{marker}</span>
+                        <span className="custom-content inline prose-p:inline">{children}</span>
+                      </li>
+                    );
+                  }
+                  return <li className="my-1" {...props}>{children}</li>;
+                },
                 
                 // Custom table rendering to ensure styles are attached for copying
                 table: ({ node, ...props }) => (
