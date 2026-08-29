@@ -6,8 +6,9 @@ export const copyContentToWord = async (elementId: string): Promise<boolean> => 
   const element = document.getElementById(elementId);
   if (!element) return false;
 
-  // 1. Get the HTML content
+  // 1. Get the HTML content and detect mode
   const htmlContent = element.innerHTML;
+  const isCustom = element.classList.contains('custom-list-type');
 
   // 2. Construct a Word-friendly HTML wrapper.
   // Microsoft Word handles HTML on the clipboard well, but it needs specific
@@ -73,6 +74,9 @@ export const copyContentToWord = async (elementId: string): Promise<boolean> => 
         .katex {
           font-size: 1.1em;
         }
+        .katex-mathml {
+          display: none !important;
+        }
         /* Ensure math symbols are visible */
         .katex-html {
           display: inline-block;
@@ -88,10 +92,38 @@ export const copyContentToWord = async (elementId: string): Promise<boolean> => 
           margin-bottom: 3pt;
         }
 
-        /* Nested List Markers for Word Compatibility - Matches Tailwind Config */
-        ul { list-style-type: disc; }
-        ul ul { list-style-type: circle; margin-top: 3pt; margin-bottom: 3pt; }
-        ul ul ul { list-style-type: square; }
+        /* Hanging Indents for Custom Mode Word Compatibility */
+        ${isCustom ? `
+          /* Reset all list styles */
+          ul, ol, li { list-style-type: none !important; margin: 0 !important; padding: 0 !important; }
+          
+          /* Style each list item as a paragraph with hanging indent */
+          li.custom-li { 
+            display: block !important;
+            margin-left: 25pt !important;
+            text-indent: -15pt !important;
+            margin-top: 3pt !important;
+            margin-bottom: 3pt !important;
+            line-height: 1.2 !important;
+          }
+          
+          /* Ensure the marker and content stay on the same line */
+          .custom-content, .custom-content p { 
+            display: inline !important; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+          }
+          
+          /* The marker span */
+          .text-brand-500 { 
+            color: #6366f1 !important; 
+            font-weight: bold !important;
+          }
+        ` : `
+          ul { list-style-type: disc; }
+          ul ul { list-style-type: circle; margin-top: 3pt; margin-bottom: 3pt; }
+          ul ul ul { list-style-type: square; }
+        `}
         
         ol { list-style-type: decimal; }
         ol ol { list-style-type: lower-alpha; margin-top: 3pt; margin-bottom: 3pt; }
