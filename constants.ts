@@ -59,7 +59,16 @@ print(calculate_position(50, 45, 2.5))
 | Acceleration | $a$ | $m/s^2$ | Derivative of velocity |
 | Force | $F$ | $N$ | $F = ma$ |
 
-## 5. Nested Lists & Priorities
+## 5. Grammar & Formula Auto-Detection
+
+Demonstrating smart LaTeX formula recognition:
+
+*   **BÀI TẬP 4: TÁI CẤU TRÚC CÂU (SENTENCE TRANSFORMATION)**
+    *   **1. Cấu trúc:** \[\text{The} + \text{Adjective} + \text{Noun Phrase}\] ; \(\rightarrow\)
+        *   **Giải thích tư duy:** Chuyển cấu trúc Chủ ngữ giả "It is + Adj + to-V" thành câu có Chủ ngữ thật là Danh động từ.
+    *   **2. Ví dụ:** \[\text{It is} + \text{beneficial} + \text{for students}\] ; \(\rightarrow\) Participating in exchange programs.
+
+## 6. Nested Lists & Priorities
 
 Demonstrating sub-items and ordinal markers:
 

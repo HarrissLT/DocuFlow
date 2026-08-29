@@ -5,6 +5,7 @@ import { LatexPreview } from './components/LatexPreview';
 import { Toolbar, EditorMode } from './components/Toolbar';
 import { SAMPLE_MARKDOWN, SAMPLE_LATEX, EMPTY_PLACEHOLDER } from './constants';
 import { copyContentToWord } from './utils/copyToWord';
+import { convertLatexToSmartMarkdown } from './utils/latexAutoConverter';
 import { motion, AnimatePresence } from 'motion/react';
 
 const PREVIEW_ID = 'docuflow-preview-pane';
@@ -46,7 +47,7 @@ export default function App() {
 
   const handleClear = () => {
     if (window.confirm('Are you sure you want to clear the editor?')) {
-      if (mode === 'markdown') {
+      if (mode === 'markdown' || mode === 'custom') {
         setMarkdownContent('');
       } else {
         setLatexContent('');
@@ -55,14 +56,49 @@ export default function App() {
   };
 
   const handleContentChange = (val: string) => {
-    if (mode === 'markdown') {
+    if (mode === 'markdown' || mode === 'custom') {
       setMarkdownContent(val);
     } else {
       setLatexContent(val);
     }
   }
 
-  const currentContent = mode === 'markdown' ? markdownContent : latexContent;
+  const handleAutoFixLatex = () => {
+    if (mode === 'markdown' || mode === 'custom') {
+      const fixed = convertLatexToSmartMarkdown(markdownContent);
+      setMarkdownContent(fixed);
+    } else {
+      const fixed = convertLatexToSmartMarkdown(latexContent);
+      setLatexContent(fixed);
+    }
+  };
+
+  const transformMarkdown = (text: string) => {
+    const listTransformed = text.split('\n').map(line => {
+      let newLine = line;
+      // Rule 3 Level 2: 4 spaces followed by * or - -> 4 spaces followed by +
+      if (newLine.match(/^\s{4,}[\*\-]/)) {
+        newLine = newLine.replace(/^(\s{4,})[\*\-]\s*/, '$1+ ');
+      } 
+      // Rule 1 & 3 Level 1: * plus spaces plus ** -> - **
+      // Handles variations in spaces
+      else if (newLine.match(/^[\*\-]\s{1,}\*\*/)) {
+        newLine = newLine.replace(/^[\*\-]\s{1,}\*\*/, '- **');
+      }
+      // Simple Level 1 bullet * -> -
+      else if (newLine.match(/^[\*]\s+/)) {
+        newLine = newLine.replace(/^[\*]\s+/, '- ');
+      }
+      return newLine;
+    }).join('\n');
+
+    return convertLatexToSmartMarkdown(listTransformed);
+  };
+
+  const currentContent = (mode === 'markdown' || mode === 'custom') ? markdownContent : latexContent;
+  const displayContent = mode === 'custom' 
+    ? transformMarkdown(markdownContent) 
+    : (mode === 'markdown' ? convertLatexToSmartMarkdown(markdownContent) : currentContent);
 
   return (
     <div className={`flex flex-col h-screen w-full overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
@@ -78,9 +114,10 @@ export default function App() {
         mode={mode}
         onModeChange={setMode}
         onLoadSample={() => {
-          if (mode === 'markdown') setMarkdownContent(SAMPLE_MARKDOWN);
+          if (mode === 'markdown' || mode === 'custom') setMarkdownContent(SAMPLE_MARKDOWN);
           else setLatexContent(SAMPLE_LATEX);
         }}
+        onAutoFixLatex={handleAutoFixLatex}
         onClear={handleClear}
         onCopy={handleCopy}
         isCopied={isCopied}
@@ -106,19 +143,20 @@ export default function App() {
           className="w-full md:w-1/2 h-1/2 md:h-full md:rounded-2xl overflow-hidden shadow-2xl shadow-black/5 dark:shadow-none border border-transparent dark:border-gray-800/50 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
         >
           <AnimatePresence mode="wait">
-            {mode === 'markdown' ? (
+            {mode === 'markdown' || mode === 'custom' ? (
               <motion.div 
-                key="markdown-preview" 
+                key={mode} 
                 className="h-full"
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3 }}
               >
-                {currentContent.trim() ? (
+                {displayContent.trim() ? (
                   <Preview 
-                    content={currentContent} 
+                    content={displayContent} 
                     previewId={PREVIEW_ID}
+                    mode={mode}
                   />
                 ) : (
                   <div className="h-full flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-600 p-8 text-center border-l border-gray-200 dark:border-gray-800">

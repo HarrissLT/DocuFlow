@@ -1,6 +1,6 @@
 {
-  "name": "DocuFlow AI Converter",
-  "description": "Professional Markdown and LaTeX converter optimized for copying AI chatbot outputs (ChatGPT, Claude, Gemini) directly to Microsoft Word with perfect formatting.",
+  "name": "DocuFlow Local Converter",
+  "description": "Offline-first local Markdown & LaTeX converter optimized for Word formatting without any external AI service dependencies.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

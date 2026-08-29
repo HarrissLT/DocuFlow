@@ -9,18 +9,16 @@
     <meta name="title" content="DocuFlow Export">
     <script>
       (function() {
+        var _f = window.fetch;
         try {
-          var desc = Object.getOwnPropertyDescriptor(window, 'fetch');
-          if (desc && desc.get && !desc.set && desc.configurable) {
-            Object.defineProperty(window, 'fetch', {
-              get: desc.get,
-              set: function(val) { console.warn("Absorbed fetch set:", val); },
-              configurable: true,
-              enumerable: desc.enumerable
-            });
-          }
-        } catch(e) {
-          console.error("Fetch polyfill fix failed", e);
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function() { return _f; },
+            set: function(v) { _f = v; }
+          });
+        } catch (e) {
+          // Fallback
         }
       })();
     </script>
