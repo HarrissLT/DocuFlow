@@ -17,10 +17,19 @@ interface PreviewProps {
   content: string;
   previewId: string;
   mode?: EditorMode;
+  isKeepLatex?: boolean;
 }
 
-export const Preview: React.FC<PreviewProps> = ({ content, previewId, mode }) => {
+export const Preview: React.FC<PreviewProps> = ({ content, previewId, mode, isKeepLatex }) => {
   const isCustom = mode === 'custom';
+
+  const remarkPlugins = isKeepLatex 
+    ? [remarkGfm, remarkBreaks] 
+    : [remarkGfm, remarkMath, remarkBreaks];
+
+  const rehypePlugins = isKeepLatex 
+    ? [rehypeRaw, rehypeHighlight] 
+    : [rehypeRaw, rehypeKatex, rehypeHighlight];
 
   return (
     <motion.div 
@@ -50,8 +59,8 @@ export const Preview: React.FC<PreviewProps> = ({ content, previewId, mode }) =>
             className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-semibold prose-a:text-brand-600 hover:prose-a:text-brand-500 prose-img:rounded-xl prose-img:shadow-lg prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-800 prose-pre:shadow-sm marker:text-brand-500"
           >
             <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-              rehypePlugins={[rehypeRaw, rehypeKatex, rehypeHighlight]}
+              remarkPlugins={remarkPlugins}
+              rehypePlugins={rehypePlugins}
               components={{
                 // Explicit list handling to ensure structure matches expectation
                 ul: ({ node, children, ...props }) => {

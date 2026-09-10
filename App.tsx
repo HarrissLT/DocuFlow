@@ -3,6 +3,7 @@ import { Editor } from './components/Editor';
 import { Preview } from './components/Preview';
 import { LatexPreview } from './components/LatexPreview';
 import { Toolbar, EditorMode } from './components/Toolbar';
+import { KeepLatexBubble } from './components/KeepLatexBubble';
 import { SAMPLE_MARKDOWN, SAMPLE_LATEX, EMPTY_PLACEHOLDER } from './constants';
 import { copyContentToWord } from './utils/copyToWord';
 import { convertLatexToSmartMarkdown } from './utils/latexAutoConverter';
@@ -16,6 +17,7 @@ export default function App() {
   const [latexContent, setLatexContent] = useState<string>(SAMPLE_LATEX);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [isKeepLatex, setIsKeepLatex] = useState<boolean>(false);
 
   // Initialize theme based on system preference
   useEffect(() => {
@@ -92,13 +94,15 @@ export default function App() {
       return newLine;
     }).join('\n');
 
-    return convertLatexToSmartMarkdown(listTransformed);
+    return isKeepLatex ? listTransformed : convertLatexToSmartMarkdown(listTransformed);
   };
 
   const currentContent = (mode === 'markdown' || mode === 'custom') ? markdownContent : latexContent;
   const displayContent = mode === 'custom' 
     ? transformMarkdown(markdownContent) 
-    : (mode === 'markdown' ? convertLatexToSmartMarkdown(markdownContent) : currentContent);
+    : (mode === 'markdown' 
+        ? (isKeepLatex ? markdownContent : convertLatexToSmartMarkdown(markdownContent)) 
+        : currentContent);
 
   return (
     <div className={`flex flex-col h-screen w-full overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
@@ -157,6 +161,7 @@ export default function App() {
                     content={displayContent} 
                     previewId={PREVIEW_ID}
                     mode={mode}
+                    isKeepLatex={isKeepLatex}
                   />
                 ) : (
                   <div className="h-full flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-600 p-8 text-center border-l border-gray-200 dark:border-gray-800">
@@ -185,6 +190,13 @@ export default function App() {
           </AnimatePresence>
         </motion.div>
       </main>
+
+      {/* Floating Keep LaTeX Bubble Button */}
+      <KeepLatexBubble 
+        isKeepLatex={isKeepLatex}
+        onToggle={() => setIsKeepLatex(prev => !prev)}
+        mode={mode}
+      />
     </div>
   );
 }
