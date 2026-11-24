@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Editor } from './components/Editor';
 import { Preview } from './components/Preview';
 import { LatexPreview } from './components/LatexPreview';
 import { Toolbar, EditorMode } from './components/Toolbar';
 import { KeepLatexBubble } from './components/KeepLatexBubble';
+import { WordToMarkdownView } from './components/WordToMarkdownView';
 import { SAMPLE_MARKDOWN, SAMPLE_LATEX, EMPTY_PLACEHOLDER } from './constants';
 import { copyContentToWord } from './utils/copyToWord';
 import { convertLatexToSmartMarkdown } from './utils/latexAutoConverter';
@@ -15,9 +16,23 @@ export default function App() {
   const [mode, setMode] = useState<EditorMode>('markdown');
   const [markdownContent, setMarkdownContent] = useState<string>(SAMPLE_MARKDOWN);
   const [latexContent, setLatexContent] = useState<string>(SAMPLE_LATEX);
+  const [word2mdOutput, setWord2mdOutput] = useState<string>('');
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [isKeepLatex, setIsKeepLatex] = useState<boolean>(false);
+
+  const word2MdActionsRef = useRef<{
+    loadSample: () => void;
+    clear: () => void;
+    copy: () => Promise<boolean>;
+  } | null>(null);
+
+  const registerWord2MdActions = useCallback(
+    (actions: { loadSample: () => void; clear: () => void; copy: () => Promise<boolean> }) => {
+      word2MdActionsRef.current = actions;
+    },
+    []
+  );
 
   // Initialize theme based on system preference
   useEffect(() => {
@@ -40,6 +55,17 @@ export default function App() {
   };
 
   const handleCopy = async () => {
+    if (mode === 'word2md') {
+      const success = word2MdActionsRef.current
+        ? await word2MdActionsRef.current.copy()
+        : false;
+      if (success) {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2500);
+      }
+      return;
+    }
+
     const success = await copyContentToWord(PREVIEW_ID);
     if (success) {
       setIsCopied(true);
@@ -48,6 +74,10 @@ export default function App() {
   };
 
   const handleClear = () => {
+    if (mode === 'word2md') {
+      word2MdActionsRef.current?.clear();
+      return;
+    }
     if (window.confirm('Are you sure you want to clear the editor?')) {
       if (mode === 'markdown' || mode === 'custom') {
         setMarkdownContent('');
@@ -63,16 +93,21 @@ export default function App() {
     } else {
       setLatexContent(val);
     }
-  }
+  };
 
   const handleAutoFixLatex = () => {
     if (mode === 'markdown' || mode === 'custom') {
       const fixed = convertLatexToSmartMarkdown(markdownContent);
       setMarkdownContent(fixed);
-    } else {
+    } else if (mode === 'latex') {
       const fixed = convertLatexToSmartMarkdown(latexContent);
       setLatexContent(fixed);
     }
+  };
+
+  const handleSendToMarkdownTab = (md: string) => {
+    setMarkdownContent(md);
+    setMode('markdown');
   };
 
   const transformMarkdown = (text: string) => {
@@ -119,6 +154,7 @@ export default function App() {
         onModeChange={setMode}
         onLoadSample={() => {
           if (mode === 'markdown' || mode === 'custom') setMarkdownContent(SAMPLE_MARKDOWN);
+          else if (mode === 'word2md') word2MdActionsRef.current?.loadSample();
           else setLatexContent(SAMPLE_LATEX);
         }}
         onAutoFixLatex={handleAutoFixLatex}
@@ -130,65 +166,76 @@ export default function App() {
       />
       
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden relative z-0 max-w-[1920px] mx-auto w-full md:p-4 gap-4">
-        {/* Editor Pane */}
-        <motion.div 
-          layout
-          className="w-full md:w-1/2 h-1/2 md:h-full md:rounded-2xl overflow-hidden shadow-2xl shadow-black/5 dark:shadow-none border border-transparent dark:border-gray-800/50"
-        >
-          <Editor 
-            value={currentContent} 
-            onChange={handleContentChange} 
+        {mode === 'word2md' ? (
+          <WordToMarkdownView
+            markdownOutput={word2mdOutput}
+            onMarkdownChange={setWord2mdOutput}
+            onSendToMarkdownTab={handleSendToMarkdownTab}
+            registerExternalActions={registerWord2MdActions}
           />
-        </motion.div>
+        ) : (
+          <>
+            {/* Editor Pane */}
+            <motion.div 
+              layout
+              className="w-full md:w-1/2 h-1/2 md:h-full md:rounded-2xl overflow-hidden shadow-2xl shadow-black/5 dark:shadow-none border border-transparent dark:border-gray-800/50"
+            >
+              <Editor 
+                value={currentContent} 
+                onChange={handleContentChange} 
+              />
+            </motion.div>
 
-        {/* Preview Pane */}
-        <motion.div 
-          layout
-          className="w-full md:w-1/2 h-1/2 md:h-full md:rounded-2xl overflow-hidden shadow-2xl shadow-black/5 dark:shadow-none border border-transparent dark:border-gray-800/50 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
-        >
-          <AnimatePresence mode="wait">
-            {mode === 'markdown' || mode === 'custom' ? (
-              <motion.div 
-                key={mode} 
-                className="h-full"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3 }}
-              >
-                {displayContent.trim() ? (
-                  <Preview 
-                    content={displayContent} 
-                    previewId={PREVIEW_ID}
-                    mode={mode}
-                    isKeepLatex={isKeepLatex}
-                  />
+            {/* Preview Pane */}
+            <motion.div 
+              layout
+              className="w-full md:w-1/2 h-1/2 md:h-full md:rounded-2xl overflow-hidden shadow-2xl shadow-black/5 dark:shadow-none border border-transparent dark:border-gray-800/50 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm"
+            >
+              <AnimatePresence mode="wait">
+                {mode === 'markdown' || mode === 'custom' ? (
+                  <motion.div 
+                    key={mode} 
+                    className="h-full"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {displayContent.trim() ? (
+                      <Preview 
+                        content={displayContent} 
+                        previewId={PREVIEW_ID}
+                        mode={mode}
+                        isKeepLatex={isKeepLatex}
+                      />
+                    ) : (
+                      <div className="h-full flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-600 p-8 text-center border-l border-gray-200 dark:border-gray-800">
+                        <motion.div 
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="max-w-md space-y-4"
+                        >
+                          <p className="text-lg whitespace-pre-line font-medium text-gray-400 dark:text-gray-500">{EMPTY_PLACEHOLDER}</p>
+                        </motion.div>
+                      </div>
+                    )}
+                  </motion.div>
                 ) : (
-                  <div className="h-full flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-600 p-8 text-center border-l border-gray-200 dark:border-gray-800">
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="max-w-md space-y-4"
-                    >
-                      <p className="text-lg whitespace-pre-line font-medium text-gray-400 dark:text-gray-500">{EMPTY_PLACEHOLDER}</p>
-                    </motion.div>
-                  </div>
+                  <motion.div 
+                    key="latex-preview" 
+                    className="h-full border-l border-gray-200 dark:border-gray-800"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <LatexPreview content={latexContent} />
+                  </motion.div>
                 )}
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="latex-preview" 
-                className="h-full border-l border-gray-200 dark:border-gray-800"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3 }}
-              >
-                <LatexPreview content={latexContent} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          </>
+        )}
       </main>
 
       {/* Floating Keep LaTeX Bubble Button */}
